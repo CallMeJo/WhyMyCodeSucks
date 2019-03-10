@@ -1,0 +1,62 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEditor;
+
+[CustomEditor(typeof(DialogueDatabase))]
+public class DialogueDatabaseEditor : Editor
+{
+    SerializedProperty prop = null;
+    public void OnEnable()
+    {
+        prop = serializedObject.FindProperty("dialogueLines");
+    }
+
+    public override void OnInspectorGUI()
+    {
+        //EditorGUILayout.PropertyField(prop, new GUIContent("Lines"));
+
+
+        for (int i = 0; i < prop.arraySize; i++)
+        {
+            SerializedProperty arrayElement = prop.GetArrayElementAtIndex(i);
+
+            EditorGUILayout.PropertyField(arrayElement, new GUIContent("line"));
+        }
+
+        GUILayout.BeginHorizontal();
+        if(GUILayout.Button(new GUIContent("Add Line")))
+        {
+            AddDialogueLine();
+        }
+
+        if(GUILayout.Button(new GUIContent("Remove Line")))
+        {
+            prop.arraySize--;
+        }
+
+        //Actually does the work
+        serializedObject.ApplyModifiedProperties();
+    }
+
+
+    private void AddDialogueLine()
+    {
+        string assetPath = EditorUtility.SaveFilePanelInProject("Dialogue Line Asset", "DialogueLine", "asset", "Select Line for Dialogue");
+        if(assetPath.Length != 0)
+        {
+            DialogueOption line = AssetDatabase.LoadAssetAtPath(assetPath, typeof(DialogueOption)) as DialogueOption;
+
+            if(line == null)
+            {
+                line = ScriptableObject.CreateInstance<DialogueOption>();
+                AssetDatabase.CreateAsset(line, assetPath);
+            }
+
+            prop.arraySize++;
+            SerializedProperty newProperty = prop.GetArrayElementAtIndex(prop.arraySize - 1);
+            newProperty.objectReferenceValue = line;
+
+        }
+    }
+}

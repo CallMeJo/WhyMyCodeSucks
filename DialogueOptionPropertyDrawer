@@ -1,0 +1,33 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEditor;
+
+[CustomPropertyDrawer(typeof(DialogueOption))]
+public class DialogueOptionPropertyDrawer : PropertyDrawer
+{
+
+    public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+    {
+        EditorGUI.BeginProperty(position, label, property);
+
+        //Draw Label
+
+        if (property.objectReferenceValue != null)
+        {
+            DialogueOption option = property.objectReferenceValue as DialogueOption;
+            SerializedObject serializedDialogue = new SerializedObject(option);
+
+            SerializedProperty serializedLine = serializedDialogue.FindProperty("line");
+            position.yMax = position.yMin + EditorGUIUtility.singleLineHeight * 5;
+            serializedLine.stringValue = EditorGUI.TextArea(position, serializedLine.stringValue);
+
+            serializedDialogue.ApplyModifiedProperties();
+        }
+        EditorGUI.EndProperty();
+    }
+    public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+    {
+        return EditorGUIUtility.singleLineHeight * 5;
+    }
+}
